@@ -8,7 +8,9 @@ system 'echo "updating..."'
 #lire le fichier json
 json = File.read('info.json')
 obj = JSON.parse(json)
+
 #on met dans des variables les infos du fichier json
+puts 'Parsing du fichier de configuration json'
 $hostname= obj['hostname']
 $baniere= obj['banniere']
 $nameserver= obj['nameserver']
@@ -25,4 +27,21 @@ cibleBaniere.write($baniere.to_s)
 #configurer le serveur DNS
 cibleDNS=File.open("/etc/resolv.conf","a+")
 cibleDNS.write("nameserver ".concat($nameserver.to_s))
+
+#update et upgrade
+puts 'updating..'
+#system 'apt-get update -y '
+
+puts 'Installation Nginx'
+system 'apt-get install -y nginx > /dev/null 2>&1'
+#enabling and restartiing nginx
+system 'update-rc.d nginx defaults > /dev/null 2>&1'
+system 'service nginx restart'
+
+puts 'installation redis server'
+system ' apt-get -y install -y redis-server > /dev/null 2>&1'
+puts  'Demarrage de Redis....:'
+system 'service redis-server restart'
+puts 'Etat:'
+system ' service redis-server status'
 
