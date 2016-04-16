@@ -45,3 +45,26 @@ system 'service redis-server restart'
 puts 'Etat:'
 system ' service redis-server status'
 
+
+# Generation du fichier index.html
+puts 'Generation du fichier html'
+index=File.open("/usr/share/nginx/html/index.html","w+")
+index.write("<!DOCTYPE html>
+<html>
+<head>
+<title>My nginx Welcome Page</title>
+<style>
+    body {
+        width: 35em;
+        margin: 0 auto;
+        font-family: Tahoma, Verdana, Arial, sans-serif;
+    }
+</style>
+</head>
+<body>
+<h1>Ceci est ma page d accueil pour nginx</h1>
+<p>cette page est generee a partir de mon script ruby.</p>
+</body>
+</html>
+")
+system "service nginx restart"
