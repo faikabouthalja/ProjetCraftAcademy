@@ -1,10 +1,13 @@
 #!/usr/bin/env ruby
 #on ajoute les librairies pour json
 require 'rubygems'
+#installation module json pour ruby
+puts 'installation module json'
+system 'gem install json  > log.txt && cat log.txt'
 require 'json'
 
 system 'echo "updating..."'
-#system 'apt-get update'
+system 'apt-get update -y  >> log.txt && cat log.txt'
 #lire le fichier json
 json = File.read('info.json')
 obj = JSON.parse(json)
@@ -28,23 +31,38 @@ cibleBaniere.write($baniere.to_s)
 cibleDNS=File.open("/etc/resolv.conf","a+")
 cibleDNS.write("nameserver ".concat($nameserver.to_s))
 
-#update et upgrade
-puts 'updating..'
-#system 'apt-get update -y '
-
 puts 'Installation Nginx'
-system 'apt-get install -y nginx > /dev/null 2>&1'
+system 'apt-get install -y nginx >> log.txt && cat log.txt'
 #enabling and restartiing nginx
-system 'update-rc.d nginx defaults > /dev/null 2>&1'
-system 'service nginx restart'
+system 'update-rc.d nginx defaults '
+system 'service nginx restart >> log.txt && cat log.txt'
 
 puts 'installation redis server'
-system ' apt-get -y install -y redis-server > /dev/null 2>&1'
+system ' apt-get -y install -y redis-server >> log.txt && cat log.txt'
 puts  'Demarrage de Redis....:'
-system 'service redis-server restart'
+system 'service redis-server restart >> log.txt && cat log.txt'
 puts 'Etat:'
 system ' service redis-server status'
+#ajout du module redis pour ruby
+system 'gem install redis >> log.txt && cat log.txt'
+system 'apt-get install bundler >> log.txt && cat log.txt'
 
+require 'redis'
+#connexion a redis
+redis=Redis.new(:host => 'localhost', :port => 6379)
+chaine=""
+#parsing du fichier log
+fichier = File.open("log.txt", "r")
+#on place contenu du fichier dans la variable chaine
+fichier.each_line { |ligne|
+chaine = chaine.concat"#{ligne}"
+}
+fichier.close
+#on ajoute contenu dans la base redis
+redis.set('logScript', chaine);
+value = redis.get('logScript');
+#afficher contenu dans la base redis
+puts value
 
 # Generation du fichier index.html
 puts 'Generation du fichier html'
@@ -67,4 +85,5 @@ index.write("<!DOCTYPE html>
 </body>
 </html>
 ")
+#on redémarre nginx pour prendre en compte la nvlle page d acceuil nginx
 system "service nginx restart"
